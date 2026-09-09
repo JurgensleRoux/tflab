@@ -1,0 +1,10 @@
+*.log
+*.tmp
+.env
+*.tfvars
+.terraform/
+*.tfstate
+*.tfstate.backup
+secrets/
+tfplan
+*.tfplan
