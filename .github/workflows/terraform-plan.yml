@@ -37,3 +37,27 @@ jobs:
       - name: Plan
         id: plan
         run: terraform plan -no-color -input=false
+
+      - uses: actions/github-scripts@v7
+        if: always()
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+        with:
+          script: |
+            condt body = [
+              '#### Terraform plan — `' + '${{ steps.plan.outcome }}' + '`',
+              '',
+              '<details><summary>Show plan</summary>',
+              '',
+              '```terraform',
+              (process.env.PLAN || '').slice(0, 60000),
+              '```',
+              '',
+              '</details>'
+            ].join('\n');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
