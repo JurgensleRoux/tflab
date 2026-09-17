@@ -7,5 +7,5 @@ jobs:
   greet:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Running as $(whoami) on $(uname-sr)"
+      - run: echo "Running as $(whoami) on $(uname -sr)"
       - run: terraform version || echo "no terraform here yet"

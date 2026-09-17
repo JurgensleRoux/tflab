@@ -11,14 +11,8 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "lab" {
-  name     = "rg-tflab-dev"
-  location = "southafricanorth"
-
-  tags = {
-    environment = "lab"
-    managed_by  = "terraform"
-  }
+data "azurerm_resource_group" "lab" {
+  name = "rg-tflab-dev"
 }
 
 resource "random_string" "suffix" {
@@ -29,8 +23,8 @@ resource "random_string" "suffix" {
 
 resource "azurerm_storage_account" "lab" {
   name                     = "sttflab${random_string.suffix.result}"
-  resource_group_name      = azurerm_resource_group.lab.name
-  location                 = azurerm_resource_group.lab.location
+  resource_group_name      = data.azurerm_resource_group.lab.name
+  location                 = data.azurerm_resource_group.lab.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
