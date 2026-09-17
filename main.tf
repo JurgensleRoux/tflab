@@ -11,6 +11,15 @@ provider "azurerm" {
   features {}
 }
 
+locals {
+  common_tags = {
+    Service     = "tflab"
+    Environment = "Dev"
+    ManagedBy   = "terraform"
+    CostCentre  = "lab"
+  }
+}
+
 data "azurerm_resource_group" "lab" {
   name = "rg-tflab-dev"
 }
@@ -27,6 +36,8 @@ resource "azurerm_storage_account" "lab" {
   location                 = data.azurerm_resource_group.lab.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
+
+  tags = local.common_tags
 }
 
 output "storage_account_name" {
