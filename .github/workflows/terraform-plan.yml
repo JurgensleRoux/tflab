@@ -44,7 +44,7 @@ jobs:
           PLAN: ${{ steps.plan.outputs.stdout }}
         with:
           script: |
-            condt body = [
+            const body = [
               '#### Terraform plan — `' + '${{ steps.plan.outcome }}' + '`',
               '',
               '<details><summary>Show plan</summary>',
