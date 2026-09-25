@@ -54,6 +54,8 @@ resource "azurerm_role_assignment" "app_acr_pull" {
 }
 
 resource "azurerm_container_app_environment" "this" {
+  count = var.enable_container_app ? 1 : 0
+
   name                       = "cae-${local.name}"
   resource_group_name        = data.azurerm_resource_group.this.name
   location                   = local.location
@@ -62,8 +64,10 @@ resource "azurerm_container_app_environment" "this" {
 }
 
 resource "azurerm_container_app" "app" {
+  count = var.enable_container_app ? 1 : 0
+
   name                         = "ca-${local.name}-app"
-  container_app_environment_id = azurerm_container_app_environment.this.id
+  container_app_environment_id = azurerm_container_app_environment.this[0].id
   resource_group_name          = data.azurerm_resource_group.this.name
   revision_mode                = "Single"
   tags                         = local.tags
@@ -104,4 +108,13 @@ resource "azurerm_container_app" "app" {
   }
 
   depends_on = [azurerm_role_assignment.app_acr_pull]
+}
+moved {
+  from = azurerm_container_app_environment.this
+  to   = azurerm_container_app_environment.this[0]
+}
+
+moved {
+  from = azurerm_container_app.app
+  to   = azurerm_container_app.app[0]
 }

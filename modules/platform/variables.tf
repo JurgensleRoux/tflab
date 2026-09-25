@@ -46,3 +46,8 @@ variable "location" {
   type        = string
   default     = null
 }
+variable "enable_container_app" {
+  description = "Create the Container Apps environment and app. False where the subscription's Container Apps quota is already spent."
+  type        = bool
+  default     = true
+}

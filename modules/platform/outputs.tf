@@ -4,7 +4,7 @@ output "acr_name" {
 }
 
 output "container_app_name" {
-  value = azurerm_container_app.app.name
+  value = one(azurerm_container_app.app[*].name)
 }
 
 output "resource_group_name" {
@@ -12,5 +12,5 @@ output "resource_group_name" {
 }
 
 output "app_url" {
-  value = "https://${azurerm_container_app.app.ingress[0].fqdn}"
+  value = try("https://${one(azurerm_container_app.app[*].ingress[0].fqdn)}", null)
 }

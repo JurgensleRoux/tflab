@@ -28,13 +28,13 @@ provider "azurerm" {
 module "platform" {
   source = "../../modules/platform"
 
-  workload            = "tflab"
-  environment         = "prod"
-  resource_group_name = "rg-tflab-prod"
-  location            = "northeurope"
-  min_replicas        = 1
-  log_retention_days  = 90
-  cost_centre         = "platform"
+  workload             = "tflab"
+  environment          = "prod"
+  resource_group_name  = "rg-tflab-prod"
+  enable_container_app = false
+  min_replicas         = 1
+  log_retention_days   = 90
+  cost_centre          = "platform"
 }
 
 output "acr_name" {
