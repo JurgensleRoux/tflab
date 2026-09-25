@@ -6,6 +6,11 @@ on:
     paths: ["app/**", ".github/workflows/app.yml"]
   workflow_dispatch:
     inputs:
+      environment:
+        description: "Environment to deploy to"
+        type: choice
+        options: [dev, prod]
+        default: dev
       tag:
         description: "Image tag (a commit SHA) to redeploy. Leave empty to build this commit."
         required: false
@@ -14,17 +19,22 @@ permissions:
   id-token: write
   contents: read
 
-concurrency:
-  group: tflab-app
-  cancel-in-progress: false
-
 env:
   IMAGE: tflab-app
+  ARM_USE_OIDC: "true"
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   build:
     if: ${{ !inputs.tag }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: tflab-app-build-${{ inputs.environment || 'dev' }}
+      cancel-in-progress: false
+    env:
+      ENVIRONMENT: ${{ inputs.environment || 'dev' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,12 +44,21 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Log in to the registry
-        run: az acr login --name "${{ vars.ACR_NAME }}"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.1"
+          terraform_wrapper: false
+
+      - name: Read the registry name from Terraform
+        id: tf
+        run: |
+          terraform -chdir="envs/$ENVIRONMENT" init -input=false
+          echo "acr=$(terraform -chdir=envs/$ENVIRONMENT output -raw acr_name)" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         run: |
-          REF="${{ vars.ACR_NAME }}.azurecr.io/$IMAGE:${{ github.sha }}"
+          REF="${{ steps.tf.outputs.acr }}.azurecr.io/$IMAGE:${{ github.sha }}"
+          az acr login --name "${{ steps.tf.outputs.acr }}"
           docker build --build-arg GIT_SHA=${{ github.sha }} -t "$REF" app
           docker push "$REF"
 
@@ -47,13 +66,33 @@ jobs:
     needs: build
     if: ${{ always() && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.environment || 'dev' }}
+    concurrency:
+      group: tflab-app-deploy-${{ inputs.environment || 'dev' }}
+      cancel-in-progress: false
+    env:
+      ENVIRONMENT: ${{ inputs.environment || 'dev' }}
     steps:
+      - uses: actions/checkout@v4
+
       - uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.1"
+          terraform_wrapper: false
+
+      - name: Read names from Terraform
+        id: tf
+        run: |
+          terraform -chdir="envs/$ENVIRONMENT" init -input=false
+          echo "acr=$(terraform -chdir=envs/$ENVIRONMENT output -raw acr_name)" >> "$GITHUB_OUTPUT"
+          echo "app=$(terraform -chdir=envs/$ENVIRONMENT output -raw container_app_name)" >> "$GITHUB_OUTPUT"
+          echo "rg=$(terraform -chdir=envs/$ENVIRONMENT output -raw resource_group_name)" >> "$GITHUB_OUTPUT"
 
       - run: az extension add --name containerapp --upgrade --only-show-errors
 
@@ -61,6 +100,6 @@ jobs:
         run: |
           TAG="${{ inputs.tag || github.sha }}"
           az containerapp update \
-            --name ca-tflab-app \
-            --resource-group rg-tflab-dev \
-            --image "${{ vars.ACR_NAME }}.azurecr.io/$IMAGE:$TAG"
+            --name "${{ steps.tf.outputs.app }}" \
+            --resource-group "${{ steps.tf.outputs.rg }}" \
+            --image "${{ steps.tf.outputs.acr }}.azurecr.io/$IMAGE:$TAG"

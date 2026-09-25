@@ -17,35 +17,39 @@ env:
 
 jobs:
   plan:
+    strategy:
+      fail-fast: false            # one broken environment must not hide the other
+      matrix:
+        environment: [dev, prod]
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: envs/${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.16.1"
-        
-      - name: Format check
-        run: terraform fmt -check -recursive
 
-      - name: Init
-        run: terraform init
+      - run: terraform fmt -check -recursive
+        working-directory: .       # formatting is checked across the whole repo
 
-      - name: Validate
-        run: terraform validate
+      - run: terraform init
+      - run: terraform validate
 
-      - name: Plan
-        id: plan
+      - id: plan
         run: terraform plan -no-color -input=false
 
       - uses: actions/github-script@v7
         if: always()
         env:
           PLAN: ${{ steps.plan.outputs.stdout }}
+          ENVIRONMENT: ${{ matrix.environment }}
         with:
           script: |
             const body = [
-              '#### Terraform plan — `' + '${{ steps.plan.outcome }}' + '`',
+              '#### Terraform plan — `' + process.env.ENVIRONMENT + '` — ' + '${{ steps.plan.outcome }}',
               '',
               '<details><summary>Show plan</summary>',
               '',
