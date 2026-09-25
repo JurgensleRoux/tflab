@@ -69,11 +69,15 @@ until az storage container create \
   sleep 15
 done
 
-echo "==> lab resource group $LAB_RG"
+echo "==> lab resource groups"
 # Deliberately NOT managed by Terraform: the pipeline's permissions are scoped
-# to this group, so Terraform must not be able to destroy it.
-az group create --name "$LAB_RG" --location "$LOCATION" \
-  --tags Service=tflab Environment=Dev ManagedBy=bootstrap -o none
+# to these groups, so Terraform must not be able to destroy them.
+for rg in "${LAB_RGS[@]}"; do
+  env="${rg##*-}"          # rg-tflab-dev -> dev
+  az group create --name "$rg" --location "$LOCATION" \
+    --tags Service=tflab Environment="$env" ManagedBy=bootstrap -o none
+  echo "    $rg ($env)"
+done
 
 echo
 echo "Done. backend.tf should say:"
