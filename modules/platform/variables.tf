@@ -40,3 +40,9 @@ variable "cost_centre" {
   type        = string
   default     = "lab"
 }
+
+variable "location" {
+  description = "Azure region for the platform. Defaults to the resource group's location."
+  type        = string
+  default     = null
+}

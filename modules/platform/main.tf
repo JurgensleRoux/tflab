@@ -5,9 +5,10 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  # One place that decides names. Change the convention here, not in nine resources.
-  name   = "${var.workload}-${var.environment}"
-  suffix = random_string.suffix.result
+  # One place that decides names and region.
+  name     = "${var.workload}-${var.environment}"
+  suffix   = random_string.suffix.result
+  location = coalesce(var.location, data.azurerm_resource_group.this.location)
 
   tags = {
     Service     = var.workload
@@ -24,7 +25,7 @@ data "azurerm_resource_group" "this" {
 resource "azurerm_container_registry" "this" {
   name                = "cr${var.workload}${var.environment}${local.suffix}"
   resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
+  location            = local.location
   sku                 = "Basic"
   admin_enabled       = false
   tags                = local.tags
@@ -33,7 +34,7 @@ resource "azurerm_container_registry" "this" {
 resource "azurerm_log_analytics_workspace" "this" {
   name                = "log-${local.name}"
   resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
+  location            = local.location
   sku                 = "PerGB2018"
   retention_in_days   = var.log_retention_days
   tags                = local.tags
@@ -42,7 +43,7 @@ resource "azurerm_log_analytics_workspace" "this" {
 resource "azurerm_user_assigned_identity" "app" {
   name                = "id-${local.name}-app"
   resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
+  location            = local.location
   tags                = local.tags
 }
 
@@ -55,7 +56,7 @@ resource "azurerm_role_assignment" "app_acr_pull" {
 resource "azurerm_container_app_environment" "this" {
   name                       = "cae-${local.name}"
   resource_group_name        = data.azurerm_resource_group.this.name
-  location                   = data.azurerm_resource_group.this.location
+  location                   = local.location
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
   tags                       = local.tags
 }
