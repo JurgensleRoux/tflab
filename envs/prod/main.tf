@@ -31,7 +31,7 @@ module "platform" {
   workload            = "tflab"
   environment         = "prod"
   resource_group_name = "rg-tflab-prod"
-  location            = "westeurope"
+  location            = "northeurope"
   min_replicas        = 1
   log_retention_days  = 90
   cost_centre         = "platform"
