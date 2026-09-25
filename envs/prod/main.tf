@@ -31,7 +31,8 @@ module "platform" {
   workload            = "tflab"
   environment         = "prod"
   resource_group_name = "rg-tflab-prod"
-  min_replicas        = 1 # no cold starts in production
+  location            = "westeurope"
+  min_replicas        = 1
   log_retention_days  = 90
   cost_centre         = "platform"
 }
