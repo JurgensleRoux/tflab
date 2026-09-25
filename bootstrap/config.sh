@@ -12,14 +12,14 @@ STATE_RG="rg-tfstate"
 STATE_ACCOUNT="sttfstateahdgal"      # globally unique; change if you rebuild
 STATE_CONTAINER="tfstate"
 
-# Where the lab resources are built (Terraform reads this as a data source)
-LAB_RG="rg-tflab-dev"
+# Where the lab resources are built (Terraform reads these as data sources)
+LAB_RGS=(rg-tflab-dev rg-tflab-prod)
 
 # The pipeline's identity in Entra ID
 APP_DISPLAY_NAME="gh-tflab"
 
-# GitHub environment that gates applies
-GH_ENVIRONMENT="production"
+# GitHub environments that gates applies
+GH_ENVIRONMENTS=(dev prod)
 
 # Built-in role definition IDs
 ACR_PULL_ROLE_ID="7f951dda-4ed3-4680-a7ca-43fe172d538d"

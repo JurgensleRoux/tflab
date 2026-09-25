@@ -65,7 +65,8 @@ add_credential() {
 
 add_credential "gh-tflab-pr"        "${SUBJECT_PREFIX}:pull_request"
 add_credential "gh-tflab-main"      "${SUBJECT_PREFIX}:ref:refs/heads/main"
-add_credential "gh-tflab-env-prod"  "${SUBJECT_PREFIX}:environment:${GH_ENVIRONMENT}"
+add_credential "gh-tflab-env-dev"   "${SUBJECT_PREFIX}:environment:dev"
+add_credential "gh-tflab-env-prod"  "${SUBJECT_PREFIX}:environment:prod"
 
 echo
 az ad app federated-credential list --id "$APP_ID" \
