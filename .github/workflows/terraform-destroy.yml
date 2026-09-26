@@ -3,8 +3,13 @@ name: Terraform Destroy
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: "Environment to destroy"
+        type: choice
+        options: [dev, prod]
+        required: true
       confirm:
-        description: 'Type "destroy" to confirm'
+        description: "Type the environment name again to confirm"
         required: true
 
 permissions:
@@ -12,25 +17,32 @@ permissions:
   contents: read
 
 concurrency:
-  group: tflab-apply
+  group: tflab-state-${{ inputs.environment }}
   cancel-in-progress: false
-
-env:
-  ARM_USE_OIDC: "true"
-  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   destroy:
-    if: ${{ inputs.confirm == 'destroy' }}
+    if: inputs.confirm == inputs.environment
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: envs/${{ inputs.environment }}
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_USE_OIDC: true
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.16.1"
-      - run: terraform init
-      - run: terraform plan -destroy -no-color -input=false
-      - run: terraform destroy -auto-approve -input=false
+
+      - name: Init
+        run: terraform init
+
+      - name: Plan destroy
+        run: terraform plan -destroy -input=false -out=tfdestroy
+
+      - name: Destroy
+        run: terraform apply -input=false -auto-approve tfdestroy

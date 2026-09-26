@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev               # no reviewers: applies straight away
     concurrency:
-      group: tflab-apply-dev
+      group: tflab-state-dev
       cancel-in-progress: false
     defaults:
       run:
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod              # required reviewer: waits for you
     concurrency:
-      group: tflab-apply-prod
+      group: tflab-state-prod
       cancel-in-progress: false
     defaults:
       run:
