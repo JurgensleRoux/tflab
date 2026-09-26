@@ -33,7 +33,7 @@ module "platform" {
   resource_group_name  = "rg-tflab-prod"
   enable_container_app = false
   min_replicas         = 1
-  log_retention_days   = 90
+  log_retention_days   = 60
   cost_centre          = "platform"
 }
 
