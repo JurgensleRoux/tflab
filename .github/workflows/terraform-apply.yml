@@ -26,7 +26,7 @@ jobs:
       run:
         working-directory: envs/dev
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.16.1"
@@ -44,7 +44,7 @@ jobs:
       run:
         working-directory: envs/prod
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.16.1"
