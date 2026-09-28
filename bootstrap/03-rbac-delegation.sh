@@ -3,6 +3,8 @@
 # Gives the pipeline identity exactly the permissions it needs, and no more:
 #   - Contributor on each lab resource group (see LAB_RGS in config.sh)
 #   - Storage Blob Data Contributor on the state account only
+#   - Resource Policy Contributor on each lab resource group, because
+#     Contributor cannot create policy assignments either
 #   - Role Based Access Control Administrator on each lab resource group,
 #     CONDITIONED so it may only grant or revoke AcrPull - nothing else
 #
@@ -69,6 +71,7 @@ assign "Storage Blob Data Contributor" "$SA_ID"
 for rg in "${LAB_RGS[@]}"; do
   RG_ID="/subscriptions/$SUB/resourceGroups/$rg"
   assign "Contributor" "$RG_ID"
+  assign "Resource Policy Contributor" "$RG_ID"
   assign_acrpull_admin "$RG_ID"
 done
 
