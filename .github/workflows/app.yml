@@ -90,10 +90,18 @@ jobs:
         id: tf
         run: |
           terraform -chdir="envs/$ENVIRONMENT" init -input=false
-          echo "acr=$(terraform -chdir=envs/$ENVIRONMENT output -raw acr_name)" >> "$GITHUB_OUTPUT"
-          echo "app=$(terraform -chdir=envs/$ENVIRONMENT output -raw container_app_name)" >> "$GITHUB_OUTPUT"
-          echo "rg=$(terraform -chdir=envs/$ENVIRONMENT output -raw resource_group_name)" >> "$GITHUB_OUTPUT"
-
+          ACR=$(terraform -chdir="envs/$ENVIRONMENT" output -raw acr_name)
+          APP=$(terraform -chdir="envs/$ENVIRONMENT" output -raw container_app_name)
+          RG=$(terraform -chdir="envs/$ENVIRONMENT" output -raw resource_group_name)
+          : "${ACR:?acr_name output is empty}"
+          : "${APP:?container_app_name is empty — enable_container_app false, or not re-exported}"
+          : "${RG:?resource_group_name output is empty}"
+          {
+            echo "acr=$ACR"
+            echo "app=$APP"
+            echo "rg=$RG"
+          } >> "$GITHUB_OUTPUT"
+           
       - run: az extension add --name containerapp --upgrade --only-show-errors
 
       - name: Deploy the image
