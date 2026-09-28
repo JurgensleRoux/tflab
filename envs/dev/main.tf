@@ -42,3 +42,10 @@ output "acr_name" {
 output "app_url" {
   value = module.platform.app_url
 }
+output "container_app_name" {
+  value = module.platform.container_app_name
+}
+
+output "resource_group_name" {
+  value = module.platform.resource_group_name
+}
