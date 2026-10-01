@@ -23,6 +23,18 @@ data "azurerm_resource_group" "this" {
 }
 
 resource "azurerm_container_registry" "this" {
+  # Every skip below has one cause: this registry is Basic. Each control
+  # Checkov wants is either a Premium-tier feature or a paid Defender plan.
+  # A customer platform would run this Premium and none of these would be here.
+  #checkov:skip=CKV_AZURE_139:Disabling public network access is Premium-only, and hosted runners push over the internet
+  #checkov:skip=CKV_AZURE_163:Vulnerability scanning is Microsoft Defender for Containers, a paid subscription plan
+  #checkov:skip=CKV_AZURE_164:Content trust is Premium-only
+  #checkov:skip=CKV_AZURE_165:Geo-replication is Premium-only and this platform is single-region
+  #checkov:skip=CKV_AZURE_166:Image quarantine is a Premium preview feature
+  #checkov:skip=CKV_AZURE_167:Untagged-manifest retention is Premium-only
+  #checkov:skip=CKV_AZURE_233:Provider rejects zone_redundancy_enabled on Basic - tested 2026-10-01
+  #checkov:skip=CKV_AZURE_237:Dedicated data endpoints are Premium-only
+
   name                = "cr${var.workload}${var.environment}${local.suffix}"
   resource_group_name = data.azurerm_resource_group.this.name
   location            = local.location
