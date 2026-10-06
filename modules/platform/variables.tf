@@ -51,3 +51,9 @@ variable "enable_container_app" {
   type        = bool
   default     = true
 }
+
+variable "enforce_policy" {
+  description = "Enforce policy assignments. False assigns them in audit mode."
+  type        = bool
+  default     = false
+}
