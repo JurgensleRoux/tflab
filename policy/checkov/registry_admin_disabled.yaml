@@ -1,0 +1,13 @@
+metadata:
+  id: "CKV_TFLAB_2"
+  name: "Container registry admin account is disabled"
+  category: "IAM"
+  severity: "HIGH"
+
+definition:
+  cond_type: "attribute"
+  resource_types:
+    - "azurerm_container_registry"
+  attribute: "admin_enabled"
+  operator: "equals"
+  value: false

@@ -1,0 +1,16 @@
+metadata:
+  id: "CKV_TFLAB_1"
+  name: "Every resource carries a CostCentre tag"
+  category: "GENERAL_SECURITY"
+  severity: "MEDIUM"
+
+definition:
+  cond_type: "attribute"
+  resource_types:
+    - "azurerm_container_registry"
+    - "azurerm_log_analytics_workspace"
+    - "azurerm_user_assigned_identity"
+    - "azurerm_container_app_environment"
+    - "azurerm_container_app"
+  attribute: "tags.CostCentre"
+  operator: "exists"
