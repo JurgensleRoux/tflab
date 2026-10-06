@@ -20,7 +20,7 @@ jobs:
           directory: .
           framework: terraform
           quiet: true
-          soft_fail: true
+          external_checks_dirs: policy/checkov
           output_format: cli,sarif
           output_file_path: console,results.sarif
 
