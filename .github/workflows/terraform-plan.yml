@@ -25,6 +25,9 @@ jobs:
     defaults:
       run:
         working-directory: envs/${{ matrix.environment }}
+    concurrency:
+      group: tflab-state-${{ matrix.environment }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
 
