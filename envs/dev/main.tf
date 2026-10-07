@@ -31,6 +31,7 @@ module "platform" {
   workload            = "tflab"
   environment         = "dev"
   resource_group_name = "rg-tflab-dev"
+  enforce_policy      = true
   min_replicas        = 0
   log_retention_days  = 30
 }
