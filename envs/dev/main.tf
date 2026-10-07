@@ -16,7 +16,7 @@ terraform {
     resource_group_name  = "rg-tfstate"
     storage_account_name = "sttfstateahdgal"
     container_name       = "tfstate"
-    key                  = "tflab.dev.tfstate" # the only line that must differ per environment
+    key                  = "tflab.prod.tfstate" # the only line that must differ per environment
     use_azuread_auth     = true
   }
 }
